@@ -187,7 +187,10 @@ export const UserWallet: React.FC<UserWalletProps> = ({ onNavigate }) => {
         <div className="px-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold text-gray-800">Recent Transactions</h2>
-            <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+            <button
+              onClick={() => onNavigate('transaction-history')}
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
               View All
             </button>
           </div>

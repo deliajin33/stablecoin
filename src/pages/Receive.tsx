@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Copy, Check, Share2, QrCode, Wallet, TrendingUp } from 'lucide-react';
+import { ArrowLeft, Copy, Check, Share2, QrCode, Wallet, TrendingUp, RotateCcw } from 'lucide-react';
 import { Card } from '../components/Card';
 
 interface ReceiveProps {
@@ -12,6 +12,8 @@ export const Receive: React.FC<ReceiveProps> = ({ onNavigate }) => {
   const [copied, setCopied] = useState(false);
   const [showAmountInput, setShowAmountInput] = useState(false);
   const [walletAddress] = useState('0x742d35Cc6634C0532925a3b8D4C9db96C4b2dF9b');
+  const [qrCodeKey, setQrCodeKey] = useState(0);
+  const [currentRequestId, setCurrentRequestId] = useState(`REC${Date.now()}`);
 
   const handleCopy = async () => {
     try {
@@ -46,9 +48,16 @@ export const Receive: React.FC<ReceiveProps> = ({ onNavigate }) => {
       currency: selectedCurrency,
       amount: amount || undefined,
       network: 'Polygon',
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      requestId: currentRequestId
     };
     return btoa(JSON.stringify(data));
+  };
+
+  const refreshQRCode = () => {
+    const newRequestId = `REC${Date.now()}`;
+    setCurrentRequestId(newRequestId);
+    setQrCodeKey(prev => prev + 1);
   };
 
   const qrData = generatePaymentData();
@@ -81,12 +90,28 @@ export const Receive: React.FC<ReceiveProps> = ({ onNavigate }) => {
 
         <div className="px-6 py-6">
           <Card className="mb-6 p-6 bg-white shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Receive QR Code</h3>
+              <button
+                onClick={refreshQRCode}
+                className="flex items-center gap-2 px-4 py-2 bg-teal-100 hover:bg-teal-200 text-teal-700 rounded-lg transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span className="text-sm font-medium">Refresh</span>
+              </button>
+            </div>
             <div className="flex items-center justify-center p-8">
-              <div className="w-64 h-64 bg-white border-4 border-gray-200 rounded-2xl flex items-center justify-center">
+              <div
+                key={qrCodeKey}
+                className="w-64 h-64 bg-white border-4 border-gray-200 rounded-2xl flex items-center justify-center transition-all duration-300"
+              >
                 <div className="text-center">
                   <QrCode className="w-48 h-48 text-gray-800 mx-auto mb-2" />
                   <div className="text-xs text-gray-500 font-mono">
-                    REC{Date.now()}
+                    {currentRequestId}
+                  </div>
+                  <div className="text-xs text-teal-600 mt-1">
+                    {qrCodeKey > 0 ? 'Refreshed' : ''}
                   </div>
                 </div>
               </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { QrCode, CheckCircle2, ArrowLeft, RefreshCw, TrendingDown, Clock } from 'lucide-react';
+import { QrCode, CheckCircle2, ArrowLeft, RefreshCw, TrendingDown, Clock, RotateCcw } from 'lucide-react';
 import { Card } from '../components/Card';
 
 interface PaymentQRCodeProps {
@@ -15,7 +15,9 @@ interface PaymentQRCodeProps {
 export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({ onNavigate, paymentData }) => {
   const [status, setStatus] = useState<'waiting' | 'paid'>('waiting');
   const [timeRemaining, setTimeRemaining] = useState(15 * 60);
-  const { merchantName, amount, currency, requestId } = paymentData;
+  const [qrCodeKey, setQrCodeKey] = useState(0);
+  const [currentRequestId, setCurrentRequestId] = useState(paymentData.requestId);
+  const { merchantName, amount, currency } = paymentData;
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -43,6 +45,20 @@ export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({ onNavigate, paymen
 
   const simulatePayment = () => {
     setStatus('paid');
+  };
+
+  const refreshQRCode = () => {
+    setQrCodeKey(prev => prev + 1);
+    setTimeRemaining(15 * 60);
+
+    // 重置状态
+    if (status === 'paid') {
+      setStatus('waiting');
+    }
+
+    // 生成新的请求ID（在实际应用中会调用后端API）
+    const newRequestId = `REQ${Date.now()}`;
+    setCurrentRequestId(newRequestId);
   };
 
   return (
@@ -76,12 +92,28 @@ export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({ onNavigate, paymen
               </Card>
 
               <Card className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-800">Payment QR Code</h3>
+                  <button
+                    onClick={refreshQRCode}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                    <span className="text-sm font-medium">Refresh</span>
+                  </button>
+                </div>
                 <div className="flex items-center justify-center p-8">
-                  <div className="w-64 h-64 bg-white border-4 border-gray-200 rounded-2xl flex items-center justify-center">
+                  <div
+                    key={qrCodeKey}
+                    className="w-64 h-64 bg-white border-4 border-gray-200 rounded-2xl flex items-center justify-center transition-all duration-300"
+                  >
                     <div className="text-center">
                       <QrCode className="w-48 h-48 text-gray-800 mx-auto mb-2" />
                       <div className="text-xs text-gray-500 font-mono">
-                        {requestId}
+                        {currentRequestId}
+                      </div>
+                      <div className="text-xs text-green-600 mt-1">
+                        {qrCodeKey > 0 ? 'Refreshed' : ''}
                       </div>
                     </div>
                   </div>
@@ -204,7 +236,7 @@ export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({ onNavigate, paymen
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Request ID</span>
-                <span className="font-mono text-gray-800">{requestId}</span>
+                <span className="font-mono text-gray-800">{currentRequestId}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Created</span>

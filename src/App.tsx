@@ -8,8 +8,9 @@ import { AdminDashboard } from './pages/AdminDashboard';
 import { PaymentCode } from './pages/PaymentCode';
 import { Transfer } from './pages/Transfer';
 import { Receive } from './pages/Receive';
+import { TransactionHistory } from './pages/TransactionHistory';
 
-type PageType = 'wallet' | 'scan' | 'payment-confirm' | 'payment-success' | 'merchant-pos' | 'payment-qr' | 'admin' | 'payment-code' | 'transfer' | 'receive';
+type PageType = 'wallet' | 'scan' | 'payment-confirm' | 'payment-success' | 'merchant-pos' | 'payment-qr' | 'admin' | 'payment-code' | 'transfer' | 'receive' | 'transaction-history' | 'user-wallet';
 
 interface PageData {
   merchantName?: string;
@@ -32,6 +33,7 @@ function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'wallet':
+      case 'user-wallet':
         return <UserWallet onNavigate={handleNavigate} />;
 
       case 'payment-confirm':
@@ -86,6 +88,9 @@ function App() {
 
       case 'admin':
         return <AdminDashboard onNavigate={handleNavigate} />;
+
+      case 'transaction-history':
+        return <TransactionHistory onNavigate={handleNavigate} />;
 
       default:
         return <UserWallet onNavigate={handleNavigate} />;

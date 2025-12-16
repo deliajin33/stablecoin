@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Copy, Check, Wallet, RefreshCw, Shield, QrCode } from 'lucide-react';
+import { ArrowLeft, Copy, Check, Wallet, RefreshCw, Shield, QrCode, RotateCcw } from 'lucide-react';
 import { Card } from '../components/Card';
 
 interface PaymentCodeProps {
@@ -12,15 +12,23 @@ export const PaymentCode: React.FC<PaymentCodeProps> = ({ onNavigate }) => {
   const [amount, setAmount] = useState('');
   const [selectedCurrency, setSelectedCurrency] = useState('USDC');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [qrCodeKey, setQrCodeKey] = useState(0);
+  const [currentRequestId, setCurrentRequestId] = useState(`REQ${Date.now()}`);
 
   const generateQRCode = () => {
     setIsGenerating(true);
+
+    // 生成新的请求ID
+    const newRequestId = `REQ${Date.now()}`;
+    setCurrentRequestId(newRequestId);
+    setQrCodeKey(prev => prev + 1);
 
     const paymentData = {
       wallet: '0x742d35Cc6634C0532925a3b8D4C9db96C4b2dF9b',
       currency: selectedCurrency,
       amount: amount || null,
       timestamp: Date.now(),
+      requestId: newRequestId,
       type: 'payment'
     };
 
@@ -80,12 +88,28 @@ export const PaymentCode: React.FC<PaymentCodeProps> = ({ onNavigate }) => {
 
         <div className="px-6 py-6">
           <Card className="mb-6 p-6 bg-white shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Your Payment QR Code</h3>
+              <button
+                onClick={generateQRCode}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg transition-colors"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span className="text-sm font-medium">Refresh</span>
+              </button>
+            </div>
             <div className="flex items-center justify-center p-8">
-              <div className="w-64 h-64 bg-white border-4 border-gray-200 rounded-2xl flex items-center justify-center">
+              <div
+                key={qrCodeKey}
+                className="w-64 h-64 bg-white border-4 border-gray-200 rounded-2xl flex items-center justify-center transition-all duration-300"
+              >
                 <div className="text-center">
                   <QrCode className="w-48 h-48 text-gray-800 mx-auto mb-2" />
                   <div className="text-xs text-gray-500 font-mono">
-                    REQ{Date.now()}
+                    {currentRequestId}
+                  </div>
+                  <div className="text-xs text-emerald-600 mt-1">
+                    {qrCodeKey > 0 ? 'Refreshed' : ''}
                   </div>
                 </div>
               </div>
