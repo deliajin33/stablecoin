@@ -161,7 +161,7 @@ export const UserWallet: React.FC<UserWalletProps> = ({ onNavigate }) => {
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center">
                 <Download className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xs font-medium text-gray-700">Receive</span>
+              <span className="text-xs font-medium text-gray-700">Receive Code</span>
             </button>
           </div>
         </div>
