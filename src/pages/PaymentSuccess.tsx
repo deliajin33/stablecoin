@@ -115,7 +115,10 @@ export const PaymentSuccess: React.FC<PaymentSuccessProps> = ({ onNavigate, paym
             <ArrowRight className="w-5 h-5" />
           </Button>
 
-          <button className="w-full py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors">
+          <button
+            onClick={() => onNavigate('payment-receipt', { paymentData })}
+            className="w-full py-3 text-gray-600 hover:text-gray-800 font-medium transition-colors"
+          >
             View Receipt
           </button>
         </div>

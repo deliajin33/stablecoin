@@ -121,7 +121,7 @@ export const PaymentCode: React.FC<PaymentCodeProps> = ({ onNavigate }) => {
                 <span className="font-semibold">Payment code ready</span>
               </div>
               <p className="text-sm text-emerald-600 mt-2">
-                Share this code to receive payment
+                Scan this code to make payment
               </p>
             </div>
           </Card>

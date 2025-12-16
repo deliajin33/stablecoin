@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { UserWallet } from './pages/UserWallet';
 import { PaymentConfirm } from './pages/PaymentConfirm';
 import { PaymentSuccess } from './pages/PaymentSuccess';
+import { PaymentReceipt } from './pages/PaymentReceipt';
 import { MerchantPOS } from './pages/MerchantPOS';
 import { PaymentQRCode } from './pages/PaymentQRCode';
 import { AdminDashboard } from './pages/AdminDashboard';
@@ -11,7 +12,7 @@ import { Receive } from './pages/Receive';
 import { TransactionHistory } from './pages/TransactionHistory';
 import { ScanQRCode } from './pages/ScanQRCode';
 
-type PageType = 'wallet' | 'scan' | 'payment-confirm' | 'payment-success' | 'merchant-pos' | 'payment-qr' | 'admin' | 'payment-code' | 'transfer' | 'receive' | 'transaction-history' | 'user-wallet';
+type PageType = 'wallet' | 'scan' | 'payment-confirm' | 'payment-success' | 'payment-receipt' | 'merchant-pos' | 'payment-qr' | 'admin' | 'payment-code' | 'transfer' | 'receive' | 'transaction-history' | 'user-wallet';
 
 interface PageData {
   merchantName?: string;
@@ -56,6 +57,18 @@ function App() {
       case 'payment-success':
         return (
           <PaymentSuccess
+            onNavigate={handleNavigate}
+            paymentData={{
+              merchantName: pageData.merchantName || '',
+              amount: pageData.amount || 0,
+              currency: pageData.currency || 'USDC',
+            }}
+          />
+        );
+
+      case 'payment-receipt':
+        return (
+          <PaymentReceipt
             onNavigate={handleNavigate}
             paymentData={{
               merchantName: pageData.merchantName || '',

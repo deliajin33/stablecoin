@@ -208,56 +208,62 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex items-center justify-between mb-12">
-          <div>
-            <h1 className="text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
-            <p className="text-blue-300">Real-time payment system overview</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
+        {/* Mobile-friendly header */}
+        <div className="mb-8 sm:mb-12">
+          {/* Title section */}
+          <div className="text-center sm:text-left mb-6 sm:mb-2">
+            <h1 className="text-2xl sm:text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
+            <p className="text-sm sm:text-base text-blue-300">Real-time payment system overview</p>
           </div>
-          <div className="flex items-center gap-4">
-            {/* Live Update Toggle */}
-            <button
-              onClick={handleToggleLiveUpdate}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all backdrop-blur-sm ${
-                isLiveUpdating
-                  ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
-                  : 'bg-gray-500/20 text-gray-300 hover:bg-gray-500/30'
-              }`}
-            >
-              {isLiveUpdating ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-              <span className="text-sm font-medium">{isLiveUpdating ? 'Live' : 'Paused'}</span>
-            </button>
 
-            {/* Refresh Button */}
-            <button
-              onClick={handleRefreshData}
-              disabled={isRefreshing}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors backdrop-blur-sm disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span className="text-sm">Refresh</span>
-            </button>
-
-            {/* Back to Home */}
+          {/* Control buttons - responsive layout */}
+          <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 sm:gap-4">
+            {/* Back to Home - moved to left */}
             <button
               onClick={() => onNavigate('wallet')}
-              className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors backdrop-blur-sm"
+              className="flex items-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors backdrop-blur-sm w-full sm:w-auto justify-center order-3 sm:order-1"
             >
-              <Home className="w-5 h-5" />
-              <span>Home</span>
+              <Home className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="text-xs sm:text-sm sm:text-base">Home</span>
             </button>
+
+            <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto order-1 sm:order-2">
+              {/* Live Update Toggle */}
+              <button
+                onClick={handleToggleLiveUpdate}
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl transition-all backdrop-blur-sm w-full sm:w-auto justify-center ${
+                  isLiveUpdating
+                    ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
+                    : 'bg-gray-500/20 text-gray-300 hover:bg-gray-500/30'
+                }`}
+              >
+                {isLiveUpdating ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+                <span className="text-xs sm:text-sm font-medium">{isLiveUpdating ? 'Live' : 'Paused'}</span>
+              </button>
+
+              {/* Refresh Button */}
+              <button
+                onClick={handleRefreshData}
+                disabled={isRefreshing}
+                className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors backdrop-blur-sm disabled:opacity-50 w-full sm:w-auto justify-center"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span className="text-xs sm:text-sm">Refresh</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Alerts Section */}
+        {/* Alerts Section - Mobile optimized */}
         {unreadAlerts.length > 0 && (
-          <div className="mb-8">
-            <div className="flex items-center gap-4 overflow-x-auto pb-2">
+          <div className="mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 overflow-x-auto pb-2">
               {unreadAlerts.map((alert) => (
                 <div
                   key={alert.id}
                   onClick={() => handleMarkAlertRead(alert.id)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all flex-shrink-0 ${
+                  className={`flex items-center gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-xl cursor-pointer transition-all flex-shrink-0 min-w-0 ${
                     alert.type === 'error'
                       ? 'bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20'
                       : alert.type === 'warning'
@@ -265,96 +271,97 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                       : 'bg-blue-500/10 border border-blue-500/30 text-blue-300 hover:bg-blue-500/20'
                   }`}
                 >
-                  {alert.type === 'error' && <AlertTriangle className="w-4 h-4" />}
-                  {alert.type === 'warning' && <AlertTriangle className="w-4 h-4" />}
-                  {alert.type === 'info' && <CheckCircle className="w-4 h-4" />}
-                  <div>
-                    <div className="text-sm font-semibold">{alert.title}</div>
-                    <div className="text-xs opacity-80">{alert.message}</div>
+                  {alert.type === 'error' && <AlertTriangle className="w-4 h-4 flex-shrink-0" />}
+                  {alert.type === 'warning' && <AlertTriangle className="w-4 h-4 flex-shrink-0" />}
+                  {alert.type === 'info' && <CheckCircle className="w-4 h-4 flex-shrink-0" />}
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs sm:text-sm font-semibold truncate">{alert.title}</div>
+                    <div className="text-xs opacity-80 hidden sm:block">{alert.message}</div>
+                    <div className="text-xs opacity-80 sm:hidden truncate">{alert.message}</div>
                   </div>
-                  <span className="text-xs opacity-60">{alert.timestamp}</span>
+                  <span className="text-xs opacity-60 whitespace-nowrap flex-shrink-0 hidden sm:block">{alert.timestamp}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <Card gradient className="relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-cyan-600/20"></div>
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-white" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                  <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
-                <div>
-                  <div className="text-white/80 text-sm">Today's Transaction Volume</div>
-                  <div className="text-white text-5xl font-bold">
+                <div className="min-w-0 flex-1">
+                  <div className="text-white/80 text-xs sm:text-sm">Today's Transaction Volume</div>
+                  <div className="text-white text-2xl sm:text-5xl font-bold truncate">
                     ${animatedVolume.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-4 text-white/90 text-sm">
-                <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4" />
-                  <span>{stats.totalTransactions} transactions today</span>
+              <div className="flex items-center gap-3 sm:gap-4 text-white/90 text-xs sm:text-sm flex-wrap">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <Activity className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="truncate">{stats.totalTransactions} transactions today</span>
                 </div>
-                <div className="text-emerald-300 font-semibold">↑ 23.5%</div>
+                <div className="text-emerald-300 font-semibold whitespace-nowrap">↑ 23.5%</div>
               </div>
             </div>
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
           <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:scale-105 transition-transform cursor-pointer">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                <Users className="w-6 h-6" />
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                <Users className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <div className={`w-2 h-2 rounded-full ${isLiveUpdating ? 'bg-emerald-300 animate-pulse' : 'bg-gray-400'}`}></div>
-                <div className="text-sm bg-white/20 px-3 py-1 rounded-full">
+                <div className="text-xs sm:text-sm bg-white/20 px-2 sm:px-3 py-1 rounded-full">
                   {isLiveUpdating ? 'Live' : 'Paused'}
                 </div>
               </div>
             </div>
-            <div className="text-4xl font-bold mb-2">{stats.activeUsers.toLocaleString()}</div>
-            <div className="text-blue-100 text-sm">
+            <div className="text-2xl sm:text-4xl font-bold mb-1 sm:mb-2">{stats.activeUsers.toLocaleString()}</div>
+            <div className="text-blue-100 text-xs sm:text-sm">
               Active Users
-              {isLiveUpdating && <span className="text-xs text-blue-200"> +{Math.floor(Math.random() * 20)}/min</span>}
+              {isLiveUpdating && <span className="text-xs text-blue-200 block sm:inline"> +{Math.floor(Math.random() * 20)}/min</span>}
             </div>
           </Card>
 
           <Card className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white hover:scale-105 transition-transform cursor-pointer">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                <Store className="w-6 h-6" />
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                <Store className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <div className={`w-2 h-2 rounded-full ${isLiveUpdating ? 'bg-emerald-300 animate-pulse' : 'bg-gray-400'}`}></div>
-                <div className="text-sm bg-white/20 px-3 py-1 rounded-full">
+                <div className="text-xs sm:text-sm bg-white/20 px-2 sm:px-3 py-1 rounded-full">
                   {isLiveUpdating ? 'Live' : 'Paused'}
                 </div>
               </div>
             </div>
-            <div className="text-4xl font-bold mb-2">{stats.activeMerchants}</div>
-            <div className="text-emerald-100 text-sm">
+            <div className="text-2xl sm:text-4xl font-bold mb-1 sm:mb-2">{stats.activeMerchants}</div>
+            <div className="text-emerald-100 text-xs sm:text-sm">
               Active Merchants
-              {isLiveUpdating && <span className="text-xs text-emerald-200"> 98% online</span>}
+              {isLiveUpdating && <span className="text-xs text-emerald-200 block sm:inline"> 98% online</span>}
             </div>
           </Card>
 
           <Card className="bg-gradient-to-br from-amber-500 to-orange-600 text-white hover:scale-105 transition-transform cursor-pointer">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                <DollarSign className="w-6 h-6" />
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                <DollarSign className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div className="text-sm bg-white/20 px-3 py-1 rounded-full">24h</div>
+              <div className="text-xs sm:text-sm bg-white/20 px-2 sm:px-3 py-1 rounded-full">24h</div>
             </div>
-            <div className="text-4xl font-bold mb-2">{stats.totalTransactions.toLocaleString()}</div>
-            <div className="text-amber-100 text-sm">
+            <div className="text-2xl sm:text-4xl font-bold mb-1 sm:mb-2">{stats.totalTransactions.toLocaleString()}</div>
+            <div className="text-amber-100 text-xs sm:text-sm">
               Total Transactions
-              <span className="text-xs bg-amber-400/30 px-2 py-1 rounded-full ml-2">+23.5%</span>
+              <span className="text-xs bg-amber-400/30 px-2 py-1 rounded-full ml-0 sm:ml-2 block sm:inline mt-1 sm:mt-0">+23.5%</span>
             </div>
           </Card>
         </div>
@@ -660,45 +667,45 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
           </div>
 
           {/* Performance Metrics */}
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-white rounded-xl">
-              <div className="text-2xl font-bold text-emerald-600 mb-1">99.9%</div>
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+            <div className="text-center p-3 sm:p-4 bg-white rounded-xl">
+              <div className="text-xl sm:text-2xl font-bold text-emerald-600 mb-1">99.9%</div>
               <div className="text-xs text-gray-600">Uptime</div>
             </div>
-            <div className="text-center p-4 bg-white rounded-xl">
-              <div className="text-2xl font-bold text-blue-600 mb-1">120ms</div>
+            <div className="text-center p-3 sm:p-4 bg-white rounded-xl">
+              <div className="text-xl sm:text-2xl font-bold text-blue-600 mb-1">120ms</div>
               <div className="text-xs text-gray-600">Avg Response</div>
             </div>
-            <div className="text-center p-4 bg-white rounded-xl">
-              <div className="text-2xl font-bold text-purple-600 mb-1">2.4K</div>
+            <div className="text-center p-3 sm:p-4 bg-white rounded-xl">
+              <div className="text-xl sm:text-2xl font-bold text-purple-600 mb-1">2.4K</div>
               <div className="text-xs text-gray-600">Requests/min</div>
             </div>
           </div>
 
           {/* Control Panel */}
-          <div className="mt-6 flex items-center justify-between p-4 bg-white/50 rounded-xl">
-            <div className="flex items-center gap-4">
+          <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between p-4 bg-white/50 rounded-xl gap-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
               <button
                 onClick={handleToggleLiveUpdate}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors flex-1 sm:flex-none ${
                   isLiveUpdating
                     ? 'bg-red-100 text-red-700 hover:bg-red-200'
                     : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
                 }`}
               >
                 {isLiveUpdating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                {isLiveUpdating ? 'Pause Monitoring' : 'Resume Monitoring'}
+                <span className="text-sm">{isLiveUpdating ? 'Pause' : 'Resume'}</span>
               </button>
               <button
                 onClick={handleRefreshData}
                 disabled={isRefreshing}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 disabled:opacity-50 transition-colors"
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 disabled:opacity-50 transition-colors flex-1 sm:flex-none"
               >
                 <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-                Refresh Data
+                <span className="text-sm">Refresh</span>
               </button>
             </div>
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-gray-500 text-center sm:text-right">
               Last updated: {new Date().toLocaleTimeString()}
             </div>
           </div>
