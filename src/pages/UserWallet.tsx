@@ -134,21 +134,30 @@ export const UserWallet: React.FC<UserWalletProps> = ({ onNavigate }) => {
               <span className="text-xs font-medium text-gray-700">Scan & Pay</span>
             </button>
 
-            <button className="flex flex-col items-center gap-2 bg-white rounded-2xl p-4 shadow-lg hover:shadow-xl transition-shadow">
+            <button
+              onClick={() => onNavigate('payment-code')}
+              className="flex flex-col items-center gap-2 bg-white rounded-2xl p-4 shadow-lg hover:shadow-xl transition-shadow"
+            >
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
                 <Wallet className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xs font-medium text-gray-700">Pay</span>
+              <span className="text-xs font-medium text-gray-700">Payment Code</span>
             </button>
 
-            <button className="flex flex-col items-center gap-2 bg-white rounded-2xl p-4 shadow-lg hover:shadow-xl transition-shadow">
+            <button
+              onClick={() => onNavigate('transfer')}
+              className="flex flex-col items-center gap-2 bg-white rounded-2xl p-4 shadow-lg hover:shadow-xl transition-shadow"
+            >
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center">
                 <Send className="w-6 h-6 text-white" />
               </div>
-              <span className="text-xs font-medium text-gray-700">Send</span>
+              <span className="text-xs font-medium text-gray-700">Transfer</span>
             </button>
 
-            <button className="flex flex-col items-center gap-2 bg-white rounded-2xl p-4 shadow-lg hover:shadow-xl transition-shadow">
+            <button
+              onClick={() => onNavigate('receive')}
+              className="flex flex-col items-center gap-2 bg-white rounded-2xl p-4 shadow-lg hover:shadow-xl transition-shadow"
+            >
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center">
                 <Download className="w-6 h-6 text-white" />
               </div>

@@ -5,8 +5,11 @@ import { PaymentSuccess } from './pages/PaymentSuccess';
 import { MerchantPOS } from './pages/MerchantPOS';
 import { PaymentQRCode } from './pages/PaymentQRCode';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { PaymentCode } from './pages/PaymentCode';
+import { Transfer } from './pages/Transfer';
+import { Receive } from './pages/Receive';
 
-type PageType = 'wallet' | 'scan' | 'payment-confirm' | 'payment-success' | 'merchant-pos' | 'payment-qr' | 'admin';
+type PageType = 'wallet' | 'scan' | 'payment-confirm' | 'payment-success' | 'merchant-pos' | 'payment-qr' | 'admin' | 'payment-code' | 'transfer' | 'receive';
 
 interface PageData {
   merchantName?: string;
@@ -71,6 +74,15 @@ function App() {
             }}
           />
         );
+
+      case 'payment-code':
+        return <PaymentCode onNavigate={handleNavigate} />;
+
+      case 'transfer':
+        return <Transfer onNavigate={handleNavigate} />;
+
+      case 'receive':
+        return <Receive onNavigate={handleNavigate} />;
 
       case 'admin':
         return <AdminDashboard onNavigate={handleNavigate} />;
