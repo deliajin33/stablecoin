@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { TrendingUp, Users, Store, DollarSign, Activity, Home, Shield, Fuel, ExternalLink } from 'lucide-react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { TrendingUp, Users, Store, DollarSign, Activity, Home, Shield, Fuel, ExternalLink, RefreshCw, AlertTriangle, CheckCircle, Eye, Download, Play, Pause, Settings } from 'lucide-react';
 import { Card } from '../components/Card';
 
 interface AdminDashboardProps {
@@ -15,6 +15,24 @@ interface DashboardStats {
   usdcPool: number;
 }
 
+interface Transaction {
+  id: string;
+  merchant: string;
+  amount: number;
+  time: string;
+  status: 'completed' | 'pending' | 'failed';
+  hash?: string;
+}
+
+interface SystemAlert {
+  id: string;
+  type: 'info' | 'warning' | 'error';
+  title: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+}
+
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) => {
   const [stats, setStats] = useState<DashboardStats>({
     todayVolume: 0,
@@ -26,6 +44,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
   });
 
   const [animatedVolume, setAnimatedVolume] = useState(0);
+  const [isLiveUpdating, setIsLiveUpdating] = useState(true);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [alerts, setAlerts] = useState<SystemAlert[]>([]);
+  const [selectedPool, setSelectedPool] = useState<'usdt' | 'usdc' | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [gasPrice, setGasPrice] = useState(15);
+  const [poolHealth, setPoolHealth] = useState(85);
 
   useEffect(() => {
     const mockStats: DashboardStats = {
@@ -54,15 +79,132 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
     return () => clearInterval(timer);
   }, []);
 
-  const recentTransactions = [
-    { id: '1', merchant: 'Starbucks Coffee', amount: 25.50, time: '2 mins ago', status: 'completed' },
-    { id: '2', merchant: 'Whole Foods Market', amount: 87.20, time: '5 mins ago', status: 'completed' },
-    { id: '3', merchant: 'Apple Store', amount: 1299.00, time: '8 mins ago', status: 'completed' },
-    { id: '4', merchant: 'Amazon', amount: 45.99, time: '12 mins ago', status: 'completed' },
-    { id: '5', merchant: 'Target', amount: 156.75, time: '15 mins ago', status: 'completed' },
+  const generateInitialTransactions = (): Transaction[] => [
+    { id: '1', merchant: 'Starbucks Coffee', amount: 25.50, time: '2 mins ago', status: 'completed', hash: '0x7f9a...2b3c' },
+    { id: '2', merchant: 'Whole Foods Market', amount: 87.20, time: '5 mins ago', status: 'completed', hash: '0x2e1d...8f5a' },
+    { id: '3', merchant: 'Apple Store', amount: 1299.00, time: '8 mins ago', status: 'completed', hash: '0x9c4b...1d7e' },
+    { id: '4', merchant: 'Amazon', amount: 45.99, time: '12 mins ago', status: 'pending', hash: '0x5a8e...3f2c' },
+    { id: '5', merchant: 'Target', amount: 156.75, time: '15 mins ago', status: 'completed', hash: '0x1f6d...9b4e' },
+  ];
+
+  const generateInitialAlerts = (): SystemAlert[] => [
+    {
+      id: '1',
+      type: 'warning',
+      title: 'High Transaction Volume',
+      message: 'Transaction volume 45% above daily average',
+      timestamp: '10 mins ago',
+      read: false
+    },
+    {
+      id: '2',
+      type: 'info',
+      title: 'Gas Price Update',
+      message: 'Gas prices decreased by 20%',
+      timestamp: '1 hour ago',
+      read: true
+    },
+    {
+      id: '3',
+      type: 'error',
+      title: 'Merchant API Alert',
+      message: 'Starbucks API latency detected',
+      timestamp: '2 hours ago',
+      read: true
+    }
   ];
 
   const poolPercentage = (stats.usdtPool / (stats.usdtPool + stats.usdcPool)) * 100;
+
+  // Initialize data
+  useEffect(() => {
+    setTransactions(generateInitialTransactions());
+    setAlerts(generateInitialAlerts());
+  }, []);
+
+  // Live data simulation
+  useEffect(() => {
+    if (!isLiveUpdating) return;
+
+    const interval = setInterval(() => {
+      // Update stats with random variations
+      setStats(prev => ({
+        ...prev,
+        todayVolume: prev.todayVolume + (Math.random() * 100 - 30),
+        activeUsers: prev.activeUsers + Math.floor(Math.random() * 10 - 3),
+        totalTransactions: prev.totalTransactions + Math.floor(Math.random() * 3),
+        activeMerchants: Math.max(200, Math.min(300, prev.activeMerchants + Math.floor(Math.random() * 5 - 2)))
+      }));
+
+      // Update gas price
+      setGasPrice(prev => Math.max(10, Math.min(50, prev + Math.floor(Math.random() * 7 - 3))));
+
+      // Update pool health
+      setPoolHealth(prev => Math.max(60, Math.min(95, prev + Math.floor(Math.random() * 10 - 5))));
+
+      // Occasionally add new transaction
+      if (Math.random() > 0.7) {
+        const merchants = ['Walmart', 'Best Buy', 'Nike Store', 'McDonald\'s', 'Home Depot', 'Costco', 'Sephora', 'Uber', 'Netflix'];
+        const newTx: Transaction = {
+          id: Date.now().toString(),
+          merchant: merchants[Math.floor(Math.random() * merchants.length)],
+          amount: Math.random() * 500 + 10,
+          time: 'Just now',
+          status: Math.random() > 0.1 ? 'completed' : 'pending',
+          hash: `0x${Math.random().toString(36).substring(2, 8)}...${Math.random().toString(36).substring(2, 6)}`
+        };
+
+        setTransactions(prev => [newTx, ...prev.slice(0, 4)]);
+
+        // Update transaction times
+        setTransactions(prev => prev.map((tx, index) => ({
+          ...tx,
+          time: index === 0 ? 'Just now' : `${index * 2 + 2} mins ago`
+        })));
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [isLiveUpdating]);
+
+  const handleRefreshData = useCallback(async () => {
+    setIsRefreshing(true);
+
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    setStats({
+      todayVolume: 127548.32 + Math.random() * 50000,
+      activeMerchants: 248 + Math.floor(Math.random() * 50),
+      activeUsers: 3892 + Math.floor(Math.random() * 500),
+      totalTransactions: 1547 + Math.floor(Math.random() * 200),
+      usdtPool: 2500000 + Math.random() * 500000,
+      usdcPool: 3750000 + Math.random() * 500000,
+    });
+
+    setIsRefreshing(false);
+  }, []);
+
+  const handleToggleLiveUpdate = () => {
+    setIsLiveUpdating(prev => !prev);
+  };
+
+  const handleMarkAlertRead = (alertId: string) => {
+    setAlerts(prev => prev.map(alert =>
+      alert.id === alertId ? { ...alert, read: true } : alert
+    ));
+  };
+
+  const handlePoolClick = (pool: 'usdt' | 'usdc') => {
+    setSelectedPool(selectedPool === pool ? null : pool);
+  };
+
+  const handleViewTransaction = (hash: string) => {
+    // Simulate opening transaction in block explorer
+    console.log('Viewing transaction:', hash);
+  };
+
+  const unreadAlerts = alerts.filter(alert => !alert.read);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
@@ -72,14 +214,70 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
             <h1 className="text-4xl font-bold text-white mb-2">Admin Dashboard</h1>
             <p className="text-blue-300">Real-time payment system overview</p>
           </div>
-          <button
-            onClick={() => onNavigate('wallet')}
-            className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors backdrop-blur-sm"
-          >
-            <Home className="w-5 h-5" />
-            <span>Back to Home</span>
-          </button>
+          <div className="flex items-center gap-4">
+            {/* Live Update Toggle */}
+            <button
+              onClick={handleToggleLiveUpdate}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all backdrop-blur-sm ${
+                isLiveUpdating
+                  ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
+                  : 'bg-gray-500/20 text-gray-300 hover:bg-gray-500/30'
+              }`}
+            >
+              {isLiveUpdating ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+              <span className="text-sm font-medium">{isLiveUpdating ? 'Live' : 'Paused'}</span>
+            </button>
+
+            {/* Refresh Button */}
+            <button
+              onClick={handleRefreshData}
+              disabled={isRefreshing}
+              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors backdrop-blur-sm disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="text-sm">Refresh</span>
+            </button>
+
+            {/* Back to Home */}
+            <button
+              onClick={() => onNavigate('wallet')}
+              className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl transition-colors backdrop-blur-sm"
+            >
+              <Home className="w-5 h-5" />
+              <span>Home</span>
+            </button>
+          </div>
         </div>
+
+        {/* Alerts Section */}
+        {unreadAlerts.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-4 overflow-x-auto pb-2">
+              {unreadAlerts.map((alert) => (
+                <div
+                  key={alert.id}
+                  onClick={() => handleMarkAlertRead(alert.id)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all flex-shrink-0 ${
+                    alert.type === 'error'
+                      ? 'bg-red-500/10 border border-red-500/30 text-red-300 hover:bg-red-500/20'
+                      : alert.type === 'warning'
+                      ? 'bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
+                      : 'bg-blue-500/10 border border-blue-500/30 text-blue-300 hover:bg-blue-500/20'
+                  }`}
+                >
+                  {alert.type === 'error' && <AlertTriangle className="w-4 h-4" />}
+                  {alert.type === 'warning' && <AlertTriangle className="w-4 h-4" />}
+                  {alert.type === 'info' && <CheckCircle className="w-4 h-4" />}
+                  <div>
+                    <div className="text-sm font-semibold">{alert.title}</div>
+                    <div className="text-xs opacity-80">{alert.message}</div>
+                  </div>
+                  <span className="text-xs opacity-60">{alert.timestamp}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="mb-8">
           <Card gradient className="relative overflow-hidden">
@@ -108,37 +306,56 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+          <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white hover:scale-105 transition-transform cursor-pointer">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
                 <Users className="w-6 h-6" />
               </div>
-              <div className="text-sm bg-white/20 px-3 py-1 rounded-full">Live</div>
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${isLiveUpdating ? 'bg-emerald-300 animate-pulse' : 'bg-gray-400'}`}></div>
+                <div className="text-sm bg-white/20 px-3 py-1 rounded-full">
+                  {isLiveUpdating ? 'Live' : 'Paused'}
+                </div>
+              </div>
             </div>
             <div className="text-4xl font-bold mb-2">{stats.activeUsers.toLocaleString()}</div>
-            <div className="text-blue-100 text-sm">Active Users</div>
+            <div className="text-blue-100 text-sm">
+              Active Users
+              {isLiveUpdating && <span className="text-xs text-blue-200"> +{Math.floor(Math.random() * 20)}/min</span>}
+            </div>
           </Card>
 
-          <Card className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+          <Card className="bg-gradient-to-br from-emerald-500 to-teal-600 text-white hover:scale-105 transition-transform cursor-pointer">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
                 <Store className="w-6 h-6" />
               </div>
-              <div className="text-sm bg-white/20 px-3 py-1 rounded-full">Live</div>
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${isLiveUpdating ? 'bg-emerald-300 animate-pulse' : 'bg-gray-400'}`}></div>
+                <div className="text-sm bg-white/20 px-3 py-1 rounded-full">
+                  {isLiveUpdating ? 'Live' : 'Paused'}
+                </div>
+              </div>
             </div>
             <div className="text-4xl font-bold mb-2">{stats.activeMerchants}</div>
-            <div className="text-emerald-100 text-sm">Active Merchants</div>
+            <div className="text-emerald-100 text-sm">
+              Active Merchants
+              {isLiveUpdating && <span className="text-xs text-emerald-200"> 98% online</span>}
+            </div>
           </Card>
 
-          <Card className="bg-gradient-to-br from-amber-500 to-orange-600 text-white">
+          <Card className="bg-gradient-to-br from-amber-500 to-orange-600 text-white hover:scale-105 transition-transform cursor-pointer">
             <div className="flex items-center justify-between mb-4">
               <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
                 <DollarSign className="w-6 h-6" />
               </div>
               <div className="text-sm bg-white/20 px-3 py-1 rounded-full">24h</div>
             </div>
-            <div className="text-4xl font-bold mb-2">{stats.totalTransactions}</div>
-            <div className="text-amber-100 text-sm">Total Transactions</div>
+            <div className="text-4xl font-bold mb-2">{stats.totalTransactions.toLocaleString()}</div>
+            <div className="text-amber-100 text-sm">
+              Total Transactions
+              <span className="text-xs bg-amber-400/30 px-2 py-1 rounded-full ml-2">+23.5%</span>
+            </div>
           </Card>
         </div>
 
@@ -166,29 +383,57 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                 </div>
 
                 <div className="flex items-center justify-between mt-3 text-sm">
-                  <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handlePoolClick('usdt')}
+                    className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
+                      selectedPool === 'usdt' ? 'bg-emerald-100' : 'hover:bg-gray-100'
+                    }`}
+                  >
                     <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
                     <span className="text-gray-600">USDT: ${(stats.usdtPool / 1000000).toFixed(2)}M</span>
-                  </div>
-                  <div className="flex items-center gap-2">
+                  </button>
+                  <button
+                    onClick={() => handlePoolClick('usdc')}
+                    className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
+                      selectedPool === 'usdc' ? 'bg-blue-100' : 'hover:bg-gray-100'
+                    }`}
+                  >
                     <div className="w-3 h-3 rounded-full bg-blue-500"></div>
                     <span className="text-gray-600">USDC: ${(stats.usdcPool / 1000000).toFixed(2)}M</span>
-                  </div>
+                  </button>
                 </div>
+
+                {selectedPool && (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-xl">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">
+                        {selectedPool.toUpperCase()} Pool Details
+                      </span>
+                      <span className="text-xs text-gray-500">Click to view more</span>
+                    </div>
+                    <div className="text-xs text-gray-600 space-y-1">
+                      <div>Current Balance: ${(selectedPool === 'usdt' ? stats.usdtPool : stats.usdcPool).toLocaleString()}</div>
+                      <div>Pool Share: {selectedPool === 'usdt' ? poolPercentage.toFixed(1) : (100 - poolPercentage).toFixed(1)}%</div>
+                      <div className="text-emerald-600">Available for withdrawals</div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-100">
-                <div className="text-center p-4 bg-emerald-50 rounded-xl">
+                <div className="text-center p-4 bg-emerald-50 rounded-xl hover:bg-emerald-100 transition-colors cursor-pointer">
                   <div className="text-2xl font-bold text-emerald-600">
                     ${(stats.usdtPool / 1000000).toFixed(1)}M
                   </div>
                   <div className="text-sm text-gray-600 mt-1">USDT Pool</div>
+                  <div className="text-xs text-emerald-500 mt-2">Click to manage</div>
                 </div>
-                <div className="text-center p-4 bg-blue-50 rounded-xl">
+                <div className="text-center p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors cursor-pointer">
                   <div className="text-2xl font-bold text-blue-600">
                     ${(stats.usdcPool / 1000000).toFixed(1)}M
                   </div>
                   <div className="text-sm text-gray-600 mt-1">USDC Pool</div>
+                  <div className="text-xs text-blue-500 mt-2">Click to manage</div>
                 </div>
               </div>
             </div>
@@ -201,26 +446,63 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
             </h3>
 
             <div className="space-y-3">
-              {recentTransactions.map((tx) => (
+              {transactions.map((tx) => (
                 <div
                   key={tx.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors"
+                  className="flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-all cursor-pointer group"
+                  onClick={() => tx.hash && handleViewTransaction(tx.hash)}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
-                      <Store className="w-5 h-5 text-blue-600" />
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                      tx.status === 'completed'
+                        ? 'bg-gradient-to-br from-emerald-100 to-emerald-200'
+                        : tx.status === 'pending'
+                        ? 'bg-gradient-to-br from-amber-100 to-amber-200'
+                        : 'bg-gradient-to-br from-red-100 to-red-200'
+                    }`}>
+                      {tx.status === 'completed' && <CheckCircle className="w-5 h-5 text-emerald-600" />}
+                      {tx.status === 'pending' && <Activity className="w-5 h-5 text-amber-600" />}
+                      {tx.status === 'failed' && <AlertTriangle className="w-5 h-5 text-red-600" />}
                     </div>
                     <div>
-                      <div className="font-semibold text-gray-800">{tx.merchant}</div>
-                      <div className="text-xs text-gray-500">{tx.time}</div>
+                      <div className="font-semibold text-gray-800 flex items-center gap-2">
+                        {tx.merchant}
+                        <Eye className="w-3 h-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
+                      <div className="text-xs text-gray-500 flex items-center gap-2">
+                        {tx.time}
+                        {tx.hash && (
+                          <>
+                            <span>•</span>
+                            <span className="font-mono">{tx.hash}</span>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="font-bold text-gray-800">${tx.amount.toFixed(2)}</div>
-                    <div className="text-xs text-emerald-600 font-semibold">{tx.status}</div>
+                    <div className={`text-xs font-semibold ${
+                      tx.status === 'completed'
+                        ? 'text-emerald-600'
+                        : tx.status === 'pending'
+                        ? 'text-amber-600'
+                        : 'text-red-600'
+                    }`}>
+                      {tx.status}
+                    </div>
                   </div>
                 </div>
               ))}
+
+              {/* Refresh transactions button */}
+              <button
+                onClick={handleRefreshData}
+                className="w-full py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl transition-colors flex items-center justify-center gap-2"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span>Refresh Transactions</span>
+              </button>
             </div>
           </Card>
         </div>
@@ -296,11 +578,29 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                 <div className="mb-3">
                   <div className="flex items-center justify-between text-sm mb-2">
                     <span className="text-gray-600">Pool Health</span>
-                    <span className="text-emerald-600 font-semibold">Excellent</span>
+                    <span className={`font-semibold ${
+                      poolHealth > 80
+                        ? 'text-emerald-600'
+                        : poolHealth > 60
+                        ? 'text-amber-600'
+                        : 'text-red-600'
+                    }`}>
+                      {poolHealth > 80 ? 'Excellent' : poolHealth > 60 ? 'Good' : 'Warning'}
+                    </span>
                   </div>
                   <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 w-[85%]"></div>
+                    <div
+                      className={`h-full transition-all duration-1000 ${
+                        poolHealth > 80
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-500'
+                          : poolHealth > 60
+                          ? 'bg-gradient-to-r from-amber-500 to-orange-500'
+                          : 'bg-gradient-to-r from-red-500 to-red-600'
+                      }`}
+                      style={{ width: `${poolHealth}%` }}
+                    ></div>
                   </div>
+                  <div className="text-xs text-gray-500 mt-1">{poolHealth}%</div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -320,9 +620,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Current Gas Price</span>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm text-gray-800">15 Gwei</span>
-                    <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-full font-semibold">
-                      Low
+                    <span className="font-mono text-sm text-gray-800">{gasPrice} Gwei</span>
+                    <span className={`px-2 py-1 text-xs rounded-full font-semibold ${
+                      gasPrice < 20
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : gasPrice < 40
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-red-100 text-red-700'
+                    }`}>
+                      {gasPrice < 20 ? 'Low' : gasPrice < 40 ? 'Medium' : 'High'}
                     </span>
                   </div>
                 </div>
@@ -339,11 +645,61 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onNavigate }) =>
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xl font-bold text-gray-800 mb-2">System Performance</h3>
-              <p className="text-gray-600">All systems operational</p>
+              <p className="text-gray-600">
+                {isLiveUpdating ? 'Real-time monitoring active' : 'Monitoring paused'}
+              </p>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-full font-semibold">
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-              Healthy
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-full font-semibold transition-colors ${
+              isLiveUpdating
+                ? 'bg-emerald-500 text-white'
+                : 'bg-gray-400 text-white'
+            }`}>
+              <div className={`w-2 h-2 rounded-full ${isLiveUpdating ? 'bg-white animate-pulse' : 'bg-white/50'}`}></div>
+              {isLiveUpdating ? 'Healthy' : 'Paused'}
+            </div>
+          </div>
+
+          {/* Performance Metrics */}
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="text-center p-4 bg-white rounded-xl">
+              <div className="text-2xl font-bold text-emerald-600 mb-1">99.9%</div>
+              <div className="text-xs text-gray-600">Uptime</div>
+            </div>
+            <div className="text-center p-4 bg-white rounded-xl">
+              <div className="text-2xl font-bold text-blue-600 mb-1">120ms</div>
+              <div className="text-xs text-gray-600">Avg Response</div>
+            </div>
+            <div className="text-center p-4 bg-white rounded-xl">
+              <div className="text-2xl font-bold text-purple-600 mb-1">2.4K</div>
+              <div className="text-xs text-gray-600">Requests/min</div>
+            </div>
+          </div>
+
+          {/* Control Panel */}
+          <div className="mt-6 flex items-center justify-between p-4 bg-white/50 rounded-xl">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={handleToggleLiveUpdate}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                  isLiveUpdating
+                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                    : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                }`}
+              >
+                {isLiveUpdating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                {isLiveUpdating ? 'Pause Monitoring' : 'Resume Monitoring'}
+              </button>
+              <button
+                onClick={handleRefreshData}
+                disabled={isRefreshing}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 disabled:opacity-50 transition-colors"
+              >
+                <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                Refresh Data
+              </button>
+            </div>
+            <div className="text-xs text-gray-500">
+              Last updated: {new Date().toLocaleTimeString()}
             </div>
           </div>
         </Card>
