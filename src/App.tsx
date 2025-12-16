@@ -9,6 +9,7 @@ import { PaymentCode } from './pages/PaymentCode';
 import { Transfer } from './pages/Transfer';
 import { Receive } from './pages/Receive';
 import { TransactionHistory } from './pages/TransactionHistory';
+import { ScanQRCode } from './pages/ScanQRCode';
 
 type PageType = 'wallet' | 'scan' | 'payment-confirm' | 'payment-success' | 'merchant-pos' | 'payment-qr' | 'admin' | 'payment-code' | 'transfer' | 'receive' | 'transaction-history' | 'user-wallet';
 
@@ -35,6 +36,9 @@ function App() {
       case 'wallet':
       case 'user-wallet':
         return <UserWallet onNavigate={handleNavigate} />;
+
+      case 'scan':
+        return <ScanQRCode onNavigate={handleNavigate} />;
 
       case 'payment-confirm':
         return (

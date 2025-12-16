@@ -120,12 +120,7 @@ export const UserWallet: React.FC<UserWalletProps> = ({ onNavigate }) => {
         <div className="px-6 -mt-20 mb-8">
           <div className="grid grid-cols-4 gap-4">
             <button
-              onClick={() => onNavigate('payment-confirm', {
-                merchantName: 'Demo Store',
-                amount: 25.00,
-                currency: 'USDC',
-                requestId: `REQ${Date.now()}`,
-              })}
+              onClick={() => onNavigate('scan')}
               className="flex flex-col items-center gap-2 bg-white rounded-2xl p-4 shadow-lg hover:shadow-xl transition-shadow"
             >
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">

@@ -132,13 +132,6 @@ export const PaymentQRCode: React.FC<PaymentQRCodeProps> = ({ onNavigate, paymen
 
               <div className="space-y-3">
                 <button
-                  onClick={handleTestPayment}
-                  className="w-full py-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
-                >
-                  Test Payment (Simulate User Scan)
-                </button>
-
-                <button
                   onClick={simulatePayment}
                   className="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl transition-colors"
                 >
